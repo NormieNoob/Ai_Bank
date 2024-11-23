@@ -18,24 +18,56 @@ export default function Signup() {
   });
 
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage('');
+    setError('');
+
+    const fullAddress = [
+      formData.addressLine1,
+      formData.addressLine2,
+      formData.city,
+      formData.state,
+      formData.zipCode
+    ].filter(Boolean).join(', ');
+
+    const payload = {
+      email: formData.email,
+      password: formData.password,
+      FirstName: formData.firstName,
+      LastName: formData.lastName,
+      Address: fullAddress,
+      PhoneNumber: formData.phone,
+      DateOfBirth: formData.dateOfBirth
+    };
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/signup`, {
+      console.log('Sending payload:', payload); // For debugging
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/createAccount`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
+      
       const data = await response.json();
+
+      console.log('Response:', data); // For debugging
+      
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to sign up');
+        setError(data.message || 'Failed to sign up');
+        return;
       }
+      
       setMessage('Account created successfully! Please sign in.');
+      
     } catch (error) {
-      setMessage(error.message);
+      console.error('Error:', error); // For debugging
+      setError(error.message || 'An error occurred during signup');
     }
   };
 
@@ -135,16 +167,17 @@ export default function Signup() {
             />
           </div>
           <input
-              type="text"
-              name="zipCode"
-              placeholder="ZIP Code"
-              value={formData.zipCode}
-              onChange={handleChange}
-              style={styles.input}
-            />
+            type="text"
+            name="zipCode"
+            placeholder="ZIP Code"
+            value={formData.zipCode}
+            onChange={handleChange}
+            style={styles.input}
+          />
+          {error && <p style={styles.error}>{error}</p>}
+          {message && <p style={styles.success}>{message}</p>}
           <button type="submit" style={styles.button}>Sign Up</button>
         </form>
-        {message && <p style={styles.message}>{message}</p>}
         <p style={styles.signinLink}>
           Already have an account? <a href="/signin" style={styles.link}>Sign In</a>
         </p>
@@ -206,9 +239,14 @@ const styles = {
     cursor: 'pointer',
     fontWeight: 'bold',
   },
-  message: {
+  error: {
     marginTop: '10px',
-    color: 'green',
+    color: '#dc3545',
+    fontSize: '14px',
+  },
+  success: {
+    marginTop: '10px',
+    color: '#28a745',
     fontSize: '14px',
   },
   signinLink: {

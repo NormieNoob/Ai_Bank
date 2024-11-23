@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 db = SQLAlchemy()
-
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -15,3 +15,5 @@ class User(db.Model):
     DateOfBirth = db.Column(db.Date, nullable=False)
     Password = db.Column(db.String(200), nullable=False)
 
+    def __repr__(self):
+        return f'<User {self.Email}>'

@@ -1,68 +1,45 @@
-# bank_app/app.py
-from flask import Flask, request, jsonify, session
-from models import db, User
+from flask import Flask
+from flask_bcrypt import Bcrypt
+from flask_cors import CORS
+from flask_session import Session
+from models import db
+from routes import auth_bp
 from config import Config
-import uuid
 
-app = Flask(__name__)
-app.config.from_object(Config)
-db.init_app(app)
+bcrypt = Bcrypt()
 
-# Initialize the database
-with app.app_context():
-    db.create_all()
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-# Sign-up route
-@app.route('/createAccount', methods=['POST'])
-def createAccount():
-    data = request.get_json()
-    email = data.get('email')
+    # Configure Flask-Session
+    app.config['SESSION_TYPE'] = 'filesystem'
+    Session(app)
 
-    if User.query.filter_by(email=email).first():
-        return jsonify({"message": "Email already exists"}), 400
+    # CORS configuration with specific origin and credentials support
+    CORS(app,
+         resources={
+             r"/auth/*": {
+                 "origins": ["http://localhost:3000"],  # Your Next.js frontend origin
+                 "supports_credentials": True,
+                 "allow_headers": ["Content-Type", "Authorization"],
+                 "methods": ["GET", "POST", "OPTIONS"]
+             }
+         })
 
-    password = data.get('password') #Have to implement password hash conversion later
-    firstName = data.get('FirstName')
-    lastName = data.get('LastName')
-    address = data.get('Address')
-    phoneNumber = data.get('PhoneNumber')
-    dateOfBirth = data.get('DateOfBirth')
+    # Initialize extensions
+    db.init_app(app)
+    bcrypt.init_app(app)
 
-    user_id = str(uuid.uuid4())
-    new_user = User(
-        UserID=user_id,
-        FirstName=firstName,
-        LastName=lastName,
-        Address=address,
-        Email=email,
-        PhoneNumber=phoneNumber,
-        DateOfBirth=dateOfBirth,
-        Password=password
-    )
+    # Register blueprints
+    app.register_blueprint(auth_bp, url_prefix='/auth')
 
-    db.session.add(new_user)
-    db.session.commit()
+    # Initialize the database
+    with app.app_context():
+        db.create_all()
 
-    return jsonify({"message": "User registered successfully"}), 201
-
-# Sign-in route
-@app.route('/signin', methods=['POST'])
-def signin():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-
-    user = User.query.filter_by(Email=email).first()
-    if user and user.Password == password:
-        return jsonify({"message": "Logged in successfully"}), 200
-    else:
-        return jsonify({"message": "Invalid username or password"}), 400
-
-# Logout route
-@app.route('/logout', methods=['POST'])
-def logout():
-    return jsonify({"message": "Logged out successfully"}), 200
+    return app
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
-
+    app = create_app()
+    app.run(host='0.0.0.0', port=5000, debug=True)

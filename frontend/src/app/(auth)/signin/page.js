@@ -1,35 +1,47 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
+  const router = useRouter();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage(''); // Clear previous messages
+    setMessage('');
     setSuccess(false);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/signin`, {
+      console.log('Attempting to sign in...'); // Debug log
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify(formData),
+        credentials: 'include',
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        }),
       });
+
       const data = await response.json();
+      console.log('Response:', data); // For debugging
 
       if (response.ok) {
         setSuccess(true);
         setMessage('Successfully signed in!');
+        router.push('/accounts/savings');
       } else {
         setSuccess(false);
         setMessage(data.message || 'Failed to sign in.');
       }
     } catch (error) {
+      console.error('Error:', error); // For debugging
       setSuccess(false);
       setMessage('An unexpected error occurred. Please try again.');
     }
@@ -53,6 +65,7 @@ export default function SignIn() {
             value={formData.email}
             onChange={handleChange}
             style={styles.input}
+            required
           />
           <input
             type="password"
@@ -61,6 +74,7 @@ export default function SignIn() {
             value={formData.password}
             onChange={handleChange}
             style={styles.input}
+            required
           />
           <button type="submit" style={styles.button}>
             Sign In
@@ -70,7 +84,7 @@ export default function SignIn() {
           <p style={success ? styles.successMessage : styles.errorMessage}>{message}</p>
         )}
         <p style={styles.signupLink}>
-          Don’t have an account? <a href="/signup" style={styles.link}>Sign Up</a>
+          Don't have an account? <a href="/signup" style={styles.link}>Sign Up</a>
         </p>
       </div>
     </div>
