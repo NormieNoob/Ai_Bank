@@ -28,6 +28,8 @@ instance/
 .pytest_cache/
 .coverage
 htmlcov/
+backend/flask_session/
+backend/database.db
 
 # React/Node
 node_modules/
