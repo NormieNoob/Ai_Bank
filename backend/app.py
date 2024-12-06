@@ -8,6 +8,7 @@ from config import Config
 
 bcrypt = Bcrypt()
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -20,7 +21,7 @@ def create_app():
     CORS(app,
          resources={
              r"/auth/*": {
-                 "origins": ["http://localhost:3000"],  # Your Next.js frontend origin
+                 "origins": ["http://localhost:3000"],
                  "supports_credentials": True,
                  "allow_headers": ["Content-Type", "Authorization"],
                  "methods": ["GET", "POST", "OPTIONS"]
@@ -39,6 +40,7 @@ def create_app():
         db.create_all()
 
     return app
+
 
 if __name__ == '__main__':
     app = create_app()
