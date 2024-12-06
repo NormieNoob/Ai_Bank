@@ -35,7 +35,7 @@ export default function SignIn() {
       if (response.ok) {
         setSuccess(true);
         setMessage('Successfully signed in!');
-        router.push('/accounts/savings');
+        router.push('/dashboard');
       } else {
         setSuccess(false);
         setMessage(data.message || 'Failed to sign in.');
