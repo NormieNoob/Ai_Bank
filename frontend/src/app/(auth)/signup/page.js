@@ -8,6 +8,7 @@ export default function Signup() {
     password: '',
     firstName: '',
     lastName: '',
+    username: '',
     phone: '',
     dateOfBirth: '',
     addressLine1: '',
@@ -35,6 +36,7 @@ export default function Signup() {
 
     const payload = {
       email: formData.email,
+      username: formData.username,
       password: formData.password,
       FirstName: formData.firstName,
       LastName: formData.lastName,
@@ -48,6 +50,7 @@ export default function Signup() {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/createAccount`, {
         method: 'POST',
+        credentials:'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -100,6 +103,14 @@ export default function Signup() {
               style={styles.input}
             />
           </div>
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            style={styles.input}
+          />
           <input
             type="email"
             name="email"

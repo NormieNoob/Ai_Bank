@@ -1,3 +1,4 @@
+#auth_service.py
 from models import db, User
 import uuid
 from flask_bcrypt import Bcrypt
@@ -21,9 +22,14 @@ class AuthService:
             if existing_user:
                 return {"success": False, "message": "Email already exists"}, 400
 
+            # Checking if the username exists
+            existing_user = User.query.filter_by(Username=data.get('username')).first()
+            if existing_user:
+                return {"success": False, "message": "Username already exists"}, 400
+
             # Validate required fields
             required_fields = ['email', 'password', 'FirstName', 'LastName',
-                               'Address', 'PhoneNumber', 'DateOfBirth']
+                               'Address', 'PhoneNumber', 'DateOfBirth', 'username']
 
             missing_fields = [field for field in required_fields if not data.get(field)]
             if missing_fields:
@@ -55,10 +61,11 @@ class AuthService:
                     UserID=user_id,
                     FirstName=data.get('FirstName'),
                     LastName=data.get('LastName'),
+                    Username=data.get('username'),
                     Address=data.get('Address'),
                     Email=data.get('email'),
                     PhoneNumber=data.get('PhoneNumber'),
-                    DateOfBirth=date_of_birth,  # Use converted date
+                    DateOfBirth=date_of_birth,
                     Password=hashed_password
                 )
 
@@ -107,7 +114,7 @@ class AuthService:
     @staticmethod
     def logout():
         try:
-            session.clear()
+            # session.pop[]
             return {"success": True, "message": "Logged out successfully"}, 200
         except Exception as e:
             return {"success": False, "message": str(e)}, 500

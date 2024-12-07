@@ -1,3 +1,4 @@
+#user.py
 from datetime import datetime
 from . import db
 
@@ -12,6 +13,7 @@ class User(db.Model):
     PhoneNumber = db.Column(db.String(20), nullable=False)
     DateOfBirth = db.Column(db.Date, nullable=False)
     Password = db.Column(db.String(200), nullable=False)
+    Username = db.Column(db.String(100), nullable=False)
 
     def __repr__(self):
         return f'<User {self.Email}>'
