@@ -11,7 +11,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{DATABASE_PATH}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True
-    SECRET_KEY = 'secret-key-here'
+    SECRET_KEY = 'lorem-ipsum'
     SESSION_TYPE = 'filesystem'
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
     SESSION_COOKIE_SECURE = True  # For HTTPS
