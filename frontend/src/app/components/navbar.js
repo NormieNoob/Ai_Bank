@@ -85,7 +85,7 @@ const Navbar = () => {
       <h1 style={styles.logo}>Banking App</h1>
       <ul style={styles.navLinks}>
         <li style={styles.navItem}>
-          <Link href="/" style={styles.link}>
+          <Link href="/dashboard" style={styles.link}>
             Home
           </Link>
         </li>
