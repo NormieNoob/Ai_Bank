@@ -65,3 +65,4 @@ Thumbs.db
 
 .next
 frontend/.next/
+*.db
