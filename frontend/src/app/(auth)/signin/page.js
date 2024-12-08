@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
   const router = useRouter();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -18,16 +18,23 @@ export default function SignIn() {
       console.log('Attempting to sign in...'); // Debug log
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/signin`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        credentials: 'include',
         body: JSON.stringify({
-          email: formData.email,
+          username: formData.username,
           password: formData.password
         }),
       });
+
+      const sessionCheck = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/test-session`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      console.log(sessionCheck)
 
       const data = await response.json();
       console.log('Response:', data); // For debugging
@@ -35,7 +42,7 @@ export default function SignIn() {
       if (response.ok) {
         setSuccess(true);
         setMessage('Successfully signed in!');
-        router.push('/dashboard');
+        router.push(`/${formData.username}/dashboard`);
       } else {
         setSuccess(false);
         setMessage(data.message || 'Failed to sign in.');
@@ -59,10 +66,10 @@ export default function SignIn() {
         <p style={styles.subheading}>Sign in to access your account</p>
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={formData.username}
             onChange={handleChange}
             style={styles.input}
             required

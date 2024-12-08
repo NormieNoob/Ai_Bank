@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useParams } from 'next/navigation'
 
 export default function DashboardPage() {
-  const [username, setUsername] = useState("John Doe"); // Replace with actual username logic
+  const [username, setUsername] = useState(""); 
+  const params = useParams();
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.welcomeMessage}>Welcome, {username}!</h1>
+      <h1 style={styles.welcomeMessage}>Welcome {username}!</h1>
       <div style={styles.cardContainer}>
-      <Link href="/accounts/savings" passHref>
+      <Link href={`/${params.uname}/accounts/savings`} passHref>
           <div style={styles.card}>
             <div style={styles.iconContainer}>
               <img
@@ -22,7 +24,7 @@ export default function DashboardPage() {
             <p style={styles.cardTitle}>Savings Accounts</p>
           </div>
         </Link>
-        <Link href="/accounts/checking" passHref>
+        <Link href={`/${params.uname}/accounts/checking`} passHref>
           <div style={styles.card}>
             <div style={styles.iconContainer}>
               <img
@@ -34,7 +36,7 @@ export default function DashboardPage() {
             <p style={styles.cardTitle}>Checking Accounts</p>
           </div>
         </Link>
-        <Link href="/accounts/creditcard" passHref>
+        <Link href={`/${params.uname}/accounts/creditcard`} passHref>
           <div style={styles.card}>
             <div style={styles.iconContainer}>
               <img

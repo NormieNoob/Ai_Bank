@@ -73,11 +73,30 @@ const Navbar = () => {
     setDropdownOpen(false);
   };
 
-  const handleLogout = () => {
-    // Clear session data (e.g., remove token from localStorage or cookies)
-    localStorage.removeItem("authToken"); // Replace with your token storage logic
-    // Redirect to the login page
-    router.push("/signin");
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      console.log('performing logout function')
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout`, {
+        method: 'POST',
+        headers:{
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+      })
+      const data = await response.json();
+      console.log('Response:', data); // For debugging
+      if (response.ok){
+        router.push("/signin");
+      }
+    }
+    catch (error) {
+      console.error('Error:', error); // For debugging
+      // setSuccess(false);
+      // setMessage('An unexpected error occurred. Please try again.');
+      alert("Logout failed")
+    }
   };
 
   return (
