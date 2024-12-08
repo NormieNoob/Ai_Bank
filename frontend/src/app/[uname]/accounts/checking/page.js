@@ -14,7 +14,7 @@ const CheckingAccount = () => {
     const fetchBalance = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/account/checking`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/accounts/checking`,
           {
             method: 'GET',
             credentials: 'include', // Include cookies for session
