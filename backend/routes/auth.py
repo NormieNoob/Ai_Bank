@@ -1,5 +1,5 @@
 # routes/auth.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from services.auth_service import AuthService
 
 auth_bp = Blueprint('auth', __name__)
@@ -20,11 +20,8 @@ def createAccount():
 def signin():
     try:
         data = request.get_json()
-        print(data.get('email'))
-        print(data.get('password'))
-
         result, status_code = AuthService.authenticate_user(
-            data.get('email'),
+            data.get('username'),
             data.get('password')
         )
         return jsonify(result), status_code
@@ -35,4 +32,16 @@ def signin():
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
-    return jsonify({"success": True, "message": "Logged out successfully"}), 200
+    # data = request.get_json()
+    # print("request data = ", f"{data.get}")
+    print("In logout route - Session contents:", dict(session))  # Add this
+    return AuthService.logout()
+
+
+@auth_bp.route('/test-session', methods=['GET'])
+def test_session():
+    username = request.cookies.get('username')
+    return jsonify({
+        "logged_in": username is not None,
+        "username": username
+    })

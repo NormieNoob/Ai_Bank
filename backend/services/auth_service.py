@@ -1,10 +1,10 @@
-#auth_service.py
 from models import db, User
 import uuid
 from flask_bcrypt import Bcrypt
 import logging
 from datetime import datetime
 from flask import session
+from .account_creation import AccountService
 
 bcrypt = Bcrypt()
 logger = logging.getLogger(__name__)
@@ -72,11 +72,21 @@ class AuthService:
                 db.session.add(new_user)
                 db.session.commit()
 
-                logger.info(f"User created successfully: {user_id}")
+                # Create checking and savings accounts for the new user
+                accounts_result, status_code = AccountService.create_accounts_for_user(user_id)
+
+                if not accounts_result["success"]:
+                    # If account creation fails, roll back the user creation
+                    db.session.rollback()
+                    logger.error(f"Failed to create accounts for user {user_id}")
+                    return accounts_result, status_code
+
+                logger.info(f"User created successfully with accounts: {user_id}")
                 return {
                     "success": True,
-                    "message": "User registered successfully",
-                    "user_id": user_id
+                    "message": "User registered successfully with checking and savings accounts",
+                    "user_id": user_id,
+                    "accounts": accounts_result["accounts"]
                 }, 201
 
             except Exception as e:
@@ -89,23 +99,31 @@ class AuthService:
             return {"success": False, "message": f"An unexpected error occurred: {str(e)}"}, 500
 
     @staticmethod
-    def authenticate_user(email, password):
+    def authenticate_user(username, password):
         try:
-            user = User.query.filter_by(Email=email).first()
+            user = User.query.filter_by(Username=username).first()
             if not user:
-                return {"success": False, "message": "Invalid email or password"}, 401
+                return {"success": False, "message": "Invalid username or password"}, 401
 
             if bcrypt.check_password_hash(user.Password, password):
-                # Session
-                session['user_id'] = user.UserID
-                session['email'] = user.Email
+                session.clear()
+                session.permanent = True
+                session['username'] = user.Username
+                session['user_id'] = user.UserID  # Added to store user_id in session
+                session.modified = True
+
+                # Get user's accounts
+                accounts_result, _ = AccountService.get_user_accounts(user.UserID)
 
                 return {
                     "success": True,
-                    "message": "Logged in successfully"
+                    "message": "Logged in successfully",
+                    "username": user.Username,
+                    "user_id": user.UserID,
+                    "accounts": accounts_result.get("accounts", []) if accounts_result["success"] else []
                 }, 200
 
-            return {"success": False, "message": "Invalid email or password"}, 401
+            return {"success": False, "message": "Invalid username or password"}, 401
 
         except Exception as e:
             logger.error(f"Login error: {str(e)}")
@@ -114,7 +132,48 @@ class AuthService:
     @staticmethod
     def logout():
         try:
-            # session.pop[]
-            return {"success": True, "message": "Logged out successfully"}, 200
+            if 'username' not in session:
+                return {"success": False, "message": "User not logged in"}, 401
+
+            logger.debug("Before clearing the session:", dict(session))
+            session.clear()
+            logger.debug("After clearing session:", dict(session))
+
+            return {
+                "success": True,
+                "message": "Logged out successfully"
+            }, 200
+
         except Exception as e:
+            logger.error(f"Logout error: {str(e)}")
+            return {"success": False, "message": str(e)}, 500
+
+    @staticmethod
+    def get_current_user():
+        try:
+            if 'username' not in session:
+                return {"success": False, "message": "User not logged in"}, 401
+
+            user = User.query.filter_by(Username=session['username']).first()
+            if not user:
+                session.clear()
+                return {"success": False, "message": "User not found"}, 404
+
+            # Get user's accounts
+            accounts_result, _ = AccountService.get_user_accounts(user.UserID)
+
+            return {
+                "success": True,
+                "user": {
+                    "user_id": user.UserID,
+                    "username": user.Username,
+                    "email": user.Email,
+                    "first_name": user.FirstName,
+                    "last_name": user.LastName,
+                    "accounts": accounts_result.get("accounts", []) if accounts_result["success"] else []
+                }
+            }, 200
+
+        except Exception as e:
+            logger.error(f"Error getting current user: {str(e)}")
             return {"success": False, "message": str(e)}, 500
