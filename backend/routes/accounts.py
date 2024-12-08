@@ -4,13 +4,10 @@ from models import db, User
 accounts_bp = Blueprint('accounts', __name__)
 
 
-@accounts_bp.route('/savings', methods=['GET', 'POST'])
-def check_savings():
-    print("savings")
+@accounts_bp.route('/checking', methods=['GET'])
+def check_savings(username):
     try:
-        data = request.get_json()
-        username = data['username']
-        result, status_code = AccountService.checking_account_balance(username, "savings")
+        result, status_code = AccountService.checking_account_balance(username, "checking")
         return jsonify(result), status_code
 
     except Exception as e:

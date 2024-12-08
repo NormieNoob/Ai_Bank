@@ -132,8 +132,8 @@ class AuthService:
     @staticmethod
     def logout():
         try:
-            if 'username' not in session:
-                return {"success": False, "message": "User not logged in"}, 401
+            # if 'username' not in session:
+            # return {"success": False, "message": "User not logged in"}, 401
 
             logger.debug("Before clearing the session:", dict(session))
             session.clear()

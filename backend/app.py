@@ -28,7 +28,7 @@ def create_app():
 
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(accounts_bp, url_prefix='/<username>/accounts')
+    app.register_blueprint(accounts_bp, url_prefix='/<username>/accounts/')
 
     # Initialize the database
     with app.app_context():
