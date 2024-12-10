@@ -60,8 +60,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 const Navbar = () => {
+  const uname = useParams().uname;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
 
@@ -104,8 +106,8 @@ const Navbar = () => {
       <h1 style={styles.logo}>Banking App</h1>
       <ul style={styles.navLinks}>
         <li style={styles.navItem}>
-          <Link href="/dashboard" style={styles.link}>
-            Home
+          <Link href={`/${uname}/dashboard`} style={styles.link}>
+            Dashboard
           </Link>
         </li>
         <li
@@ -134,17 +136,17 @@ const Navbar = () => {
               }}
             >
               <li style={styles.dropdownItem}>
-                <Link href="/accounts/savings" style={styles.dropdownLink}>
+                <Link href={`/${uname}/accounts/savings`} style={styles.dropdownLink}>
                   Savings Account
                 </Link>
               </li>
               <li style={styles.dropdownItem}>
-                <Link href="/accounts/checking" style={styles.dropdownLink}>
+                <Link href={`/${uname}/accounts/checking`} style={styles.dropdownLink}>
                   Checking Account
                 </Link>
               </li>
               <li style={styles.dropdownItem}>
-                <Link href="/accounts/credit" style={styles.dropdownLink}>
+                <Link href={`/${uname}/accounts/creditcard`} style={styles.dropdownLink}>
                   Credit Card
                 </Link>
               </li>
