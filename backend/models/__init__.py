@@ -5,4 +5,4 @@ db = SQLAlchemy()
 from .user import db, User
 from .account import Account
 from .balance import Balance
-# from .transaction import Transaction
+from .transaction import Transaction
