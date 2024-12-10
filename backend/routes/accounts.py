@@ -102,3 +102,90 @@ def deposit_amount(username):
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
 
+@accounts_bp.route('/transfer', methods=['POST'])
+def transfer_funds(username):
+    try:
+        # Parse JSON data from request
+        data = request.get_json()
+        from_account_type = data.get('fromAccountType')  # "Checking" or "Savings"
+        to_username = data.get('toUsername')  # Recipient's username
+        transfer_amount = data.get('transferAmount')
+        from_account_type = from_account_type.lower()
+
+        # Validate inputs
+        if not from_account_type or not to_username or not transfer_amount:
+            return jsonify({"success": False, "message": "All fields are required."}), 400
+
+        if transfer_amount <= 0:
+            return jsonify({"success": False, "message": "Transfer amount must be greater than zero."}), 400
+
+        # Find sender's user and account
+        sender_user = User.query.filter_by(Username=username).first()
+        if not sender_user:
+            return jsonify({"success": False, "message": "Sender not found."}), 404
+
+        sender_account = Account.query.filter_by(
+            UserID=sender_user.UserID,
+            AccountType=from_account_type
+        ).first()
+        if not sender_account:
+            return jsonify({"success": False, "message": f"Sender {from_account_type} account not found."}), 404
+
+        # Fetch sender's balance
+        sender_balance = Balance.query.filter_by(AccountID=sender_account.AccountID).first()
+        if not sender_balance or sender_balance.Amount < transfer_amount:
+            return jsonify({"success": False, "message": "Insufficient balance for transfer."}), 400
+
+        # Find recipient's user and account
+        recipient_user = User.query.filter_by(Username=to_username).first()
+        if not recipient_user:
+            return jsonify({"success": False, "message": "Recipient not found."}), 404
+
+        recipient_account = Account.query.filter_by(
+            UserID=recipient_user.UserID,
+            AccountType=from_account_type
+        ).first()
+        if not recipient_account:
+            return jsonify({"success": False, "message": f"Recipient {from_account_type} account not found."}), 404
+
+        # Fetch recipient's balance or create a new balance record
+        recipient_balance = Balance.query.filter_by(AccountID=recipient_account.AccountID).first()
+        if not recipient_balance:
+            recipient_balance = Balance(
+                BalanceID=str(uuid.uuid4()),
+                AccountID=recipient_account.AccountID,
+                Amount=0.0
+            )
+            db.session.add(recipient_balance)
+
+        # Perform transfer: deduct from sender and add to recipient
+        sender_balance.Amount -= transfer_amount
+        sender_balance.LastUpdated = datetime.utcnow()
+
+        recipient_balance.Amount += transfer_amount
+        recipient_balance.LastUpdated = datetime.utcnow()
+
+        # Create transaction records for both sender and recipient
+        transaction = Transaction(
+            TransactionID=str(uuid.uuid4()),
+            FromAccountID=sender_account.AccountID,
+            ToAccountID=recipient_account.AccountID,
+            Amount=transfer_amount,
+            TransactionType="Transfer",
+            TransactionDate=datetime.utcnow(),
+        )
+        db.session.add(transaction)
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": f"Successfully transferred ${transfer_amount} from {username}'s {from_account_type} account to {to_username}'s {from_account_type} account.",
+            "from_balance": sender_balance.Amount,
+            "to_balance": recipient_balance.Amount
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
