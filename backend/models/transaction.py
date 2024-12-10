@@ -10,4 +10,4 @@ class Transaction(db.Model):
     Amount = db.Column(db.Float, nullable=False)
     TransactionType = db.Column(db.String(50), nullable=False)
     TransactionDate = db.Column(db.DateTime, default=datetime.utcnow)
-    BranchID = db.Column(db.String(50), db.ForeignKey('branch.BranchID'), nullable=False)
+    # BranchID = db.Column(db.String(50), db.ForeignKey('branch.BranchID'), nullable=False)
