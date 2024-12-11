@@ -102,6 +102,7 @@ def deposit_amount(username):
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
 
+
 @accounts_bp.route('/transfer', methods=['POST'])
 def transfer_funds(username):
     try:
@@ -189,3 +190,66 @@ def transfer_funds(username):
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
+
+@accounts_bp.route('/withdraw', methods=['POST'])
+def withdraw_amount(username):
+    try:
+        # Parse JSON data from request
+        data = request.get_json()
+
+        account_type = data.get('accountType')  # "Checking" or "Savings"
+        withdraw_amount = data.get('withdrawAmount')
+        account_type = account_type.lower()
+
+        print(f"{withdraw_amount} and {account_type}")
+
+        # Validate the input
+        if not account_type or not withdraw_amount:
+            return jsonify({"success": False, "message": "Account type and withdrawal amount are required."}), 400
+
+        if withdraw_amount <= 0:
+            return jsonify({"success": False, "message": "Withdrawal amount must be greater than zero."}), 400
+
+        # Find the account based on the username and account type
+        user = User.query.filter_by(Username=username).first()
+        account = Account.query.filter_by(
+            UserID=user.UserID,
+            AccountType=account_type
+        ).first()
+
+        if not account:
+            return jsonify({"success": False, "message": "Account not found for the specified user."}), 404
+
+        # Check if balance record exists for the account
+        balance = Balance.query.filter_by(AccountID=account.AccountID).first()
+        if not balance or balance.Amount is None:
+            return jsonify({"success": False, "message": "No balance record found for this account."}), 404
+
+        # Validate sufficient funds
+        if withdraw_amount > balance.Amount:
+            return jsonify({"success": False, "message": "Insufficient funds in the account for this withdrawal."}), 400
+
+        # Deduct the amount from the balance
+        balance.Amount -= withdraw_amount
+        balance.LastUpdated = datetime.utcnow()
+
+        # Create a new transaction record
+        transaction = Transaction(
+            TransactionID=str(uuid.uuid4()),
+            FromAccountID=account.AccountID,
+            ToAccountID=None,  # No "to" account for withdrawals
+            Amount=withdraw_amount,
+            TransactionType="Withdrawal",
+            TransactionDate=datetime.utcnow(),
+        )
+        db.session.add(transaction)
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        return jsonify({"success": True, "message": f"Successfully withdrew ${withdraw_amount} from {account_type} account."}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+
