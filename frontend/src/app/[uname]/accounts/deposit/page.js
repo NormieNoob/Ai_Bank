@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 
 export default function DepositPage() {
-    const uname = useParams().uname
+  const uname = useParams().uname
   const [selectedAccount, setSelectedAccount] = useState(""); // State to track selected account
   const [amount, setAmount] = useState(""); // State to track deposit amount
   const [message, setMessage] = useState(""); // Success/Error message
