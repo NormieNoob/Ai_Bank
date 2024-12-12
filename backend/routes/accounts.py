@@ -58,6 +58,9 @@ def deposit_amount(username):
             AccountType=account_type
         ).first()
 
+        if account is None:
+            return jsonify({"success": False, "message": f"{account_type} Account does not exist."}), 400
+
         print(f"Balance is {account.balance}")
 
         if not account:
@@ -218,7 +221,7 @@ def withdraw_amount(username):
         ).first()
 
         if not account:
-            return jsonify({"success": False, "message": "Account not found for the specified user."}), 404
+            return jsonify({"success": False, "message": f" {account_type} account not found for the specified user."}), 404
 
         # Check if balance record exists for the account
         balance = Balance.query.filter_by(AccountID=account.AccountID).first()
