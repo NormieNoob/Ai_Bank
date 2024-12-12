@@ -7,6 +7,7 @@ const CheckingAccount = () => {
   const [balance, setBalance] = useState(null); // State to store the balance
   const [error, setError] = useState(null);    // State to handle errors
   const [loading, setLoading] = useState(true); // State to indicate loading
+  const [data, setData] = useState(null)
   const params = useParams(); // Get the `uname` from the URL parameters
 
   useEffect(() => {
@@ -21,12 +22,20 @@ const CheckingAccount = () => {
           }
         );
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
+        // if (!response.ok) {
+        //   throw new Error(`Error: ${response.statusText}`);
+        // }
 
         const data = await response.json();
-        setBalance(data.balance); // Assuming the backend sends a balance field
+        setData(data)
+        if (data.success) {
+          setBalance(data.balance); 
+        }
+        else{
+          console.log(data)
+          setBalance(data.message)
+        }
+        
       } catch (err) {
         setError(err.message);
       } finally {
@@ -35,7 +44,7 @@ const CheckingAccount = () => {
     };
 
     fetchBalance();
-  }, [params.uname]); // Depend on params.uname to refetch if it changes
+  }, [params.uname]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -48,7 +57,7 @@ const CheckingAccount = () => {
   return (
     <div>
       <h2>Checking Account</h2>
-      <p>Your balance is: ${balance}</p>
+      {data && (data.success ? ( <p>Your balance is: {balance}</p>) : (<p>{data.message}</p>))}
     </div>
   );
 };
