@@ -1,50 +1,82 @@
-'use client'; // Mark this file as a client component
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 
 const CheckingAccount = () => {
-  const [balance, setBalance] = useState(null); // State to store the balance
-  const [error, setError] = useState(null);    // State to handle errors
-  const [loading, setLoading] = useState(true); // State to indicate loading
-  const [data, setData] = useState(null)
-  const params = useParams(); // Get the `uname` from the URL parameters
+  const [balance, setBalance] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
+  const [creating, setCreating] = useState(false);
+  const params = useParams();
+
+  const fetchBalance = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/accounts/checking`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
+
+      const data = await response.json();
+      setData(data);
+      if (data.success) {
+        setBalance(data.balance);
+      } else {
+        console.log(data.message);
+        console.log(data.status);
+        if (data.status === "accountNotFound") {
+          setBalance(data.message);
+        }
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Fetch the balance when the component mounts
-    const fetchBalance = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/accounts/checking`,
-          {
-            method: 'GET',
-            credentials: 'include', // Include cookies for session
-          }
-        );
-
-        // if (!response.ok) {
-        //   throw new Error(`Error: ${response.statusText}`);
-        // }
-
-        const data = await response.json();
-        setData(data)
-        if (data.success) {
-          setBalance(data.balance); 
-        }
-        else{
-          console.log(data)
-          setBalance(data.message)
-        }
-        
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBalance();
   }, [params.uname]);
+
+  const handleCreateAccount = async () => {
+    setCreating(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/accounts/create`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            accountType: 'checking'
+          })
+        }
+      );
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // After successful creation, fetch the updated account details
+        setLoading(true);
+        await fetchBalance();
+      } else {
+        setError(result.message || 'Failed to create account');
+      }
+    } catch (err) {
+      setError(err.message || 'An error occurred while creating the account');
+    } finally {
+      setCreating(false);
+    }
+  };
 
   if (loading) {
     return <p>Loading...</p>;
@@ -57,7 +89,23 @@ const CheckingAccount = () => {
   return (
     <div>
       <h2>Checking Account</h2>
-      {data && (data.success ? ( <p>Your balance is: {balance}</p>) : (<p>{data.message}</p>))}
+      {data && (data.success ? (
+        <p>Your balance is: {balance}</p>
+      ) : (
+        <div>
+          <p>{data.message}</p>
+          <p>
+            Click here to Create a new Account{' '}
+            <button 
+              onClick={handleCreateAccount}
+              disabled={creating}
+            >
+              {creating ? 'Creating...' : 'Open Checking Account'}
+            </button>
+          </p>
+          {error && <p className="text-red-500">Error: {error}</p>}
+        </div>
+      ))}
     </div>
   );
 };

@@ -19,7 +19,6 @@ class AccountService:
 
     @staticmethod
     def create_accounts_for_user(user_id, account_type):
-        """Creates both checking and savings accounts for a new user."""
         try:
             accounts = []
             account_id = str(uuid.uuid4())
@@ -91,6 +90,7 @@ class AccountService:
             if account is None:
                 return {
                     "success": False,
+                    "status": "accountNotFound",
                     "message": f" {account_type} Account does not exist"
                 }, 200
             balance = account.balance
@@ -107,3 +107,4 @@ class AccountService:
                 "success": False,
                 "message": f"Error fetching the account : {str(e)}"
             }, 404
+

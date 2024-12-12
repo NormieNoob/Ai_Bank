@@ -1,63 +1,100 @@
-'use client'; // Mark this file as a client component
+// 'use client'; // Mark this file as a client component
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+// import React, { useState, useEffect } from 'react';
+// import { useParams } from 'next/navigation';
 
-const SavingsAccount = () => {
-  const [balance, setBalance] = useState(null); // State to store the balance
-  const [error, setError] = useState(null);    // State to handle errors
-  const [loading, setLoading] = useState(true); // State to indicate loading
-  const [data, setData] = useState(null)
-  const params = useParams(); // Get the `uname` from the URL parameters
+// const SavingsAccount = () => {
+//   const [balance, setBalance] = useState(null); // State to store the balance
+//   const [error, setError] = useState(null);    // State to handle errors
+//   const [loading, setLoading] = useState(true); // State to indicate loading
+//   const [data, setData] = useState(null)
+//   const params = useParams(); // Get the `uname` from the URL parameters
 
-  useEffect(() => {
-    // Fetch the balance when the component mounts
-    const fetchBalance = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/accounts/savings`,
-          {
-            method: 'GET',
-            credentials: 'include', // Include cookies for session
-          }
-        );
+//   useEffect(() => {
+//     // Fetch the balance when the component mounts
+//     const fetchBalance = async () => {
+//       try {
+//         const response = await fetch(
+//           `${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/accounts/savings`,
+//           {
+//             method: 'GET',
+//             credentials: 'include', // Include cookies for session
+//           }
+//         );
 
-        const data = await response.json();
-        setData(data)
-        if (data.success) {
-          setBalance(data.balance); 
-        }
-        else{
-          console.log(data['message'])
-          setBalance(data.message)
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+//         const data = await response.json();
+//         setData(data)
+//         if (data.success) {
+//           setBalance(data.balance); 
+//         }
+//         else{
+//           console.log(data.message)
+//           console.log(data.status)
+//           if(data.status==="accountNotFound"){
+//             setBalance(data.message)
+//           }
+//         }
+//       } catch (err) {
+//         setError(err.message);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
 
-    fetchBalance();
-  }, [params.uname]); // Depend on params.uname to refetch if it changes
+//     fetchBalance();
+//   }, [params.uname]);
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+//   const handleCreateAccount = async () => {
+//     setCreating(true);
+//     setError(null);
+    
+//     try {
+//       const response = await fetch(
+//         `${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/accounts/create`,
+//         {
+//           method: 'POST',
+//           credentials: 'include',
+//         }
+//       );
 
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
+//       const result = await response.json();
+      
+//       if (result.success) {
+//         // Refresh the account data after creation
+//         setData(result);
+//         setBalance(result.balance);
+//       } else {
+//         setError(result.message || 'Failed to create account');
+//       }
+//     } catch (err) {
+//       setError(err.message || 'An error occurred while creating the account');
+//     } finally {
+//       setCreating(false);
+//     }
+//   };
 
-  return (
-    <div>
-      <h2>Savings Account</h2>
-      {data && (data.success ? ( <p>Your balance is: {balance}</p>) : (<p>{data.message}</p>))}
-    </div>
-  );
-};
+//   if (loading) {
+//     return <p>Loading...</p>;
+//   }
 
-export default SavingsAccount;
+//   if (error) {
+//     return <p>Error: {error}</p>;
+//   }
+
+//   return (
+//     <div>
+//       <h2>Savings Account</h2>
+//       {data && (data.success ? ( <p>Your balance is: {balance}</p>) : (
+//       <div>
+//         <p>{data.message}</p>
+//         <p>Click here to Create a new Account <button onClick={}>Open Savings Account</button></p>
+//       </div>
+//       ))}
+//     </div>
+//   );
+// };
+
+// export default SavingsAccount;
 
 // 'use client'; // Mark this file as a client component
 
@@ -205,3 +242,116 @@ export default SavingsAccount;
 
 // export default SavingsAccount;
 
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+
+const SavingsAccount = () => {
+  const [balance, setBalance] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
+  const [creating, setCreating] = useState(false);
+  const params = useParams();
+
+  const fetchBalance = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/accounts/savings`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
+
+      const data = await response.json();
+      setData(data);
+      if (data.success) {
+        setBalance(data.balance);
+      } else {
+        console.log(data.message);
+        console.log(data.status);
+        if (data.status === "accountNotFound") {
+          setBalance(data.message);
+        }
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBalance();
+  }, [params.uname]);
+
+  const handleCreateAccount = async () => {
+    setCreating(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/accounts/create`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            accountType: 'savings'
+          })
+        }
+      );
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // After successful creation, fetch the updated account details
+        setLoading(true);
+        await fetchBalance();
+      } else {
+        setError(result.message || 'Failed to create account');
+      }
+    } catch (err) {
+      setError(err.message || 'An error occurred while creating the account');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
+
+  return (
+    <div>
+      <h2>Savings Account</h2>
+      {data && (data.success ? (
+        <p>Your balance is: {balance}</p>
+      ) : (
+        <div>
+          <p>{data.message}</p>
+          <p>
+            Click here to Create a new Account{' '}
+            <button 
+              onClick={handleCreateAccount}
+              disabled={creating}
+            >
+              {creating ? 'Creating...' : 'Open Savings Account'}
+            </button>
+          </p>
+          {error && <p className="text-red-500">Error: {error}</p>}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default SavingsAccount;

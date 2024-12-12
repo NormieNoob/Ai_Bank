@@ -221,7 +221,7 @@ def withdraw_amount(username):
         ).first()
 
         if not account:
-            return jsonify({"success": False, "message": f" {account_type} account not found for the specified user."}), 404
+            return jsonify({"success": False, "message": f" {account_type} account not found for the specified user."}), 400
 
         # Check if balance record exists for the account
         balance = Balance.query.filter_by(AccountID=account.AccountID).first()
@@ -255,4 +255,20 @@ def withdraw_amount(username):
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
+
+@accounts_bp.route('/create', methods=['POST'])
+def createAccount(username):
+    try:
+        data = request.get_json()
+        account_type = data.get('accountType')
+        user = User.query.filter_by(Username=username).first()
+        if not user:
+            return jsonify({"success": False, "message": f" {account_type} account not found for the specified user."}), 400
+
+        result, status_code = AccountService.create_accounts_for_user(user.UserID, account_type)
+        return jsonify(result), status_code
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
