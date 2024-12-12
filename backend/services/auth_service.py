@@ -28,8 +28,8 @@ class AuthService:
                 return {"success": False, "message": "Username already exists"}, 400
 
             # Validate required fields
-            required_fields = ['email', 'password', 'FirstName', 'LastName',
-                               'Address', 'PhoneNumber', 'DateOfBirth', 'username']
+            required_fields = ['email', 'password', 'firstName', 'lastName',
+                               'address', 'phoneNumber', 'dateOfBirth', 'username', 'accountType']
 
             missing_fields = [field for field in required_fields if not data.get(field)]
             if missing_fields:
@@ -40,7 +40,7 @@ class AuthService:
 
             try:
                 # Convert date string to date object
-                date_of_birth = datetime.strptime(data.get('DateOfBirth'), '%Y-%m-%d').date()
+                date_of_birth = datetime.strptime(data.get('dateOfBirth'), '%Y-%m-%d').date()
             except Exception as e:
                 logger.error(f"Date conversion error: {str(e)}")
                 return {"success": False, "message": "Invalid date format. Use YYYY-MM-DD"}, 400
@@ -59,12 +59,12 @@ class AuthService:
                 user_id = str(uuid.uuid4())
                 new_user = User(
                     UserID=user_id,
-                    FirstName=data.get('FirstName'),
-                    LastName=data.get('LastName'),
+                    FirstName=data.get('firstName'),
+                    LastName=data.get('lastName'),
                     Username=data.get('username'),
-                    Address=data.get('Address'),
+                    Address=data.get('address'),
                     Email=data.get('email'),
-                    PhoneNumber=data.get('PhoneNumber'),
+                    PhoneNumber=data.get('phoneNumber'),
                     DateOfBirth=date_of_birth,
                     Password=hashed_password
                 )
@@ -73,7 +73,13 @@ class AuthService:
                 db.session.commit()
 
                 # Create checking and savings accounts for the new user
-                accounts_result, status_code = AccountService.create_accounts_for_user(user_id)
+                accountType = data.get('accountType')
+                if accountType.get('checking'):
+                    accounts_result, status_code = AccountService.create_accounts_for_user(user_id,
+                                                                                           'checking')
+                if accountType.get('savings'):
+                    accounts_result, status_code = AccountService.create_accounts_for_user(user_id,
+                                                                                           'savings')
 
                 if not accounts_result["success"]:
                     # If account creation fails, roll back the user creation

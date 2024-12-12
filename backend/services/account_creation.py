@@ -18,38 +18,35 @@ class AccountService:
     }
 
     @staticmethod
-    def create_accounts_for_user(user_id):
+    def create_accounts_for_user(user_id, account_type):
         """Creates both checking and savings accounts for a new user."""
         try:
             accounts = []
+            account_id = str(uuid.uuid4())
 
-            # Create both account types
-            for account_type in AccountService.ACCOUNT_TYPES:
-                account_id = str(uuid.uuid4())
+            # Create the account
+            new_account = Account(
+                AccountID=account_id,
+                AccountType=account_type,
+                InterestRate=AccountService.ACCOUNT_TYPES[account_type]['interest_rate'],
+                DateCreated=datetime.utcnow().date(),
+                UserID=user_id
+            )
 
-                # Create the account
-                new_account = Account(
-                    AccountID=account_id,
-                    AccountType=account_type,
-                    InterestRate=AccountService.ACCOUNT_TYPES[account_type]['interest_rate'],
-                    DateCreated=datetime.utcnow().date(),
-                    UserID=user_id
-                )
+            # Create initial balance record
+            initial_balance = Balance(
+                BalanceID=str(uuid.uuid4()),
+                AccountID=account_id,
+                Amount=0.0,
+                LastUpdated=datetime.utcnow()
+            )
 
-                # Create initial balance record
-                initial_balance = Balance(
-                    BalanceID=str(uuid.uuid4()),
-                    AccountID=account_id,
-                    Amount=0.0,
-                    LastUpdated=datetime.utcnow()
-                )
-
-                db.session.add(new_account)
-                db.session.add(initial_balance)
-                accounts.append({
-                    'account_id': account_id,
-                    'account_type': account_type
-                })
+            db.session.add(new_account)
+            db.session.add(initial_balance)
+            accounts.append({
+                'account_id': account_id,
+                'account_type': account_type
+            })
 
             db.session.commit()
             logger.info(f"Created checking and savings accounts for user {user_id}")
@@ -86,12 +83,17 @@ class AccountService:
         """Helper function to get user_id from username."""
         try:
             user = User.query.filter_by(Username=username).first()
+            print(user.FirstName)
             account = Account.query.filter_by(
                 UserID=user.UserID,
                 AccountType=account_type
             ).first()
+            if account is None:
+                return {
+                    "success": False,
+                    "message": f" {account_type} Account does not exist"
+                }, 200
             balance = account.balance
-            print(balance)
             return {
                 "success": True,
                 "account_type": account_type,
@@ -101,6 +103,7 @@ class AccountService:
                 "interest_rate": account.InterestRate
             }, 200
         except Exception as e:
-            logger.error(f"Error fetching user_id for username {username}: {str(e)}")
-            return None
-
+            return {
+                "success": False,
+                "message": f"Error fetching the account : {str(e)}"
+            }, 404
