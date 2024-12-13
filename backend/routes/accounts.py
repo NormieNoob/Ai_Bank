@@ -271,20 +271,23 @@ def createAccount(username):
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-@accounts_bp.route('/savings/recent-transactions', methods=['GET'])
+@accounts_bp.route('/recent-transactions', methods=['POST'])
 def recent_transactions(username):
     try:
+
+        data = request.get_json()
+        account_type = data.get('accountType')
         # Find the user based on the username
         user = User.query.filter_by(Username=username).first()
         if not user:
             return jsonify({"success": False, "message": "User not found."}), 404
 
         # Find the savings account for the user
-        account = Account.query.filter_by(UserID=user.UserID, AccountType='savings').first()
+        account = Account.query.filter_by(UserID=user.UserID, AccountType=account_type).first()
         if not account:
-            return jsonify({"success": False, "message": "Savings account not found."}), 404
+            return jsonify({"success": False, "message": f"{account_type} account not found."}), 404
 
-        # Fetch the 5 most recent transactions for the savings account
+        # Fetch the 5 most recent transactions for the account
         transactions = (
             Transaction.query.filter_by(ToAccountID=account.AccountID)
             .order_by(Transaction.TransactionDate.desc())
