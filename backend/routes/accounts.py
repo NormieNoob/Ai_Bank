@@ -271,4 +271,43 @@ def createAccount(username):
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+@accounts_bp.route('/savings/recent-transactions', methods=['GET'])
+def recent_transactions(username):
+    try:
+        # Find the user based on the username
+        user = User.query.filter_by(Username=username).first()
+        if not user:
+            return jsonify({"success": False, "message": "User not found."}), 404
+
+        # Find the savings account for the user
+        account = Account.query.filter_by(UserID=user.UserID, AccountType='savings').first()
+        if not account:
+            return jsonify({"success": False, "message": "Savings account not found."}), 404
+
+        # Fetch the 5 most recent transactions for the savings account
+        transactions = (
+            Transaction.query.filter_by(ToAccountID=account.AccountID)
+            .order_by(Transaction.TransactionDate.desc())
+            .limit(5)
+            .all()
+        )
+
+        # Serialize the transactions
+        transaction_data = [
+            {
+                "TransactionID": transaction.TransactionID,
+                "FromAccountID": transaction.FromAccountID,
+                "ToAccountID": transaction.ToAccountID,
+                "Amount": transaction.Amount,
+                "TransactionType": transaction.TransactionType,
+                "TransactionDate": transaction.TransactionDate.isoformat(),
+            }
+            for transaction in transactions
+        ]
+
+        return jsonify({"success": True, "transactions": transaction_data}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
