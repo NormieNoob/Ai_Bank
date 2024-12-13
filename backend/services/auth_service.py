@@ -29,7 +29,7 @@ class AuthService:
 
             # Validate required fields
             required_fields = ['email', 'password', 'firstName', 'lastName',
-                               'address', 'phoneNumber', 'dateOfBirth', 'username', 'accountType']
+                               'address', 'phoneNumber', 'dateOfBirth', 'username', 'accountType', 'subscriptionType']
 
             missing_fields = [field for field in required_fields if not data.get(field)]
             if missing_fields:
@@ -66,7 +66,8 @@ class AuthService:
                     Email=data.get('email'),
                     PhoneNumber=data.get('phoneNumber'),
                     DateOfBirth=date_of_birth,
-                    Password=hashed_password
+                    Password=hashed_password,
+                    SubscriptionType=data.get('subscriptionType', 'free')
                 )
 
                 db.session.add(new_user)

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { getGeminiResponse } from "@/utils/gemini";
 import Navbar from "../components/navbar";
 import { useParams } from 'next/navigation';
+import SpendingGraph from '@/utils/SpendingGraph';
 
 const TransactionSection = ({ transactions, error }) => {
   const getAmountColor = (amount) => {
@@ -60,6 +61,18 @@ const TransactionSection = ({ transactions, error }) => {
           No transactions to display
         </div>
       )}
+    </div>
+  );
+};
+
+const TransactionAnalytics = ({ transactions, error }) => {
+  if (error) {
+    return null;
+  }
+
+  return (
+    <div style={styles.analyticsSection}>
+      <SpendingGraph transactions={transactions} />
     </div>
   );
 };
@@ -312,58 +325,72 @@ export default function ChatPage() {
   };
 
   return (
-    <>
+    <div>
       <Navbar />
-      <div style={styles.pageContainer}>
-        <div style={styles.chatSection}>
-          <h1 style={styles.heading}>AI Banking Assistant</h1>
-          <div style={styles.chatContainer}>
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                style={message.role === "user" ? styles.userMessage : styles.aiMessage}
-              >
-                {formatMessage(message.content)}
-              </div>
-            ))}
-            {isLoading && (
-              <div style={styles.aiMessage}>
-                <p>Thinking...</p>
-              </div>
-            )}
+      <div style={styles.container}>
+        <div style={styles.content}>
+          <div style={styles.chatSection}>
+            <h1 style={styles.heading}>AI Banking Assistant</h1>
+            <div style={styles.chatContainer}>
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  style={message.role === "user" ? styles.userMessage : styles.aiMessage}
+                >
+                  {formatMessage(message.content)}
+                </div>
+              ))}
+              {isLoading && (
+                <div style={styles.aiMessage}>
+                  <p>Thinking...</p>
+                </div>
+              )}
+            </div>
+            <form onSubmit={handleSubmit} style={styles.form}>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask me anything about banking..."
+                style={styles.input}
+                disabled={isLoading}
+              />
+              <button type="submit" style={styles.button} disabled={isLoading}>
+                Send
+              </button>
+            </form>
           </div>
-          <form onSubmit={handleSubmit} style={styles.form}>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything about banking..."
-              style={styles.input}
-              disabled={isLoading}
-            />
-            <button type="submit" style={styles.button} disabled={isLoading}>
-              Send
-            </button>
-          </form>
+          <div style={styles.rightPanel}>
+            <TransactionSection transactions={transactions} error={error} />
+            <TransactionAnalytics transactions={transactions} error={error} />
+          </div>
         </div>
-        <TransactionSection transactions={transactions} error={error} />
       </div>
-    </>
+    </div>
   );
 }
 
 const styles = {
-  pageContainer: {
-    display: 'flex',
+  container: {
     maxWidth: '1200px',
     margin: '0 auto',
     padding: '20px',
-    gap: '20px',
     fontFamily: 'Proxima Nova, -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+  },
+  content: {
+    display: 'flex',
+    gap: '20px',
+    marginTop: '20px', // Add space below navbar
   },
   chatSection: {
     flex: '2',
     maxWidth: '800px',
+  },
+  rightPanel: {
+    flex: '1',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
   },
   heading: {
     textAlign: "center",
@@ -525,4 +552,11 @@ const styles = {
     color: '#666',
     marginTop: '10px',
   },
+  analyticsSection: {
+    marginTop: '20px',
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+    padding: '20px',
+  }
 }; 
