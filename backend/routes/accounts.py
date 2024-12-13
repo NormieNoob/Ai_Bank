@@ -111,7 +111,7 @@ def transfer_funds(username):
     try:
         # Parse JSON data from request
         data = request.get_json()
-        from_account_type = data.get('fromAccountType')  # "Checking" or "Savings"
+        from_account_type = data.get('accountType')  # "Checking" or "Savings"
         to_username = data.get('toUsername')  # Recipient's username
         transfer_amount = data.get('transferAmount')
         from_account_type = from_account_type.lower()
@@ -147,7 +147,7 @@ def transfer_funds(username):
 
         recipient_account = Account.query.filter_by(
             UserID=recipient_user.UserID,
-            AccountType=from_account_type
+            AccountType="checking"
         ).first()
         if not recipient_account:
             return jsonify({"success": False, "message": f"Recipient {from_account_type} account not found."}), 404

@@ -1,28 +1,58 @@
 "use client";
 
 import { useState } from "react";
+import { useParams } from "next/navigation";
 
 export default function TransferPage() {
+  const params = useParams(); // Use useParams hook at the top level
   const [fromAccount, setFromAccount] = useState(""); // State to track selected "From Account"
   const [toUsername, setToUsername] = useState(""); // State to track "To Username"
   const [amount, setAmount] = useState(""); // State to track transfer amount
   const [description, setDescription] = useState(""); // State to track transfer description
   const [message, setMessage] = useState("");
+  const [error, setError] = useState(""); // State to track error messages
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setError("");
 
     if (!fromAccount || !toUsername || !amount) {
-      setMessage("Please fill out all required fields to complete the transfer.");
+      setError("Please fill out all required fields to complete the transfer.");
       return;
     }
 
-    // Handle transfer logic here
-    console.log(`Transferring ${amount} from ${fromAccount} to ${toUsername}`);
-    console.log(`Description: ${description}`);
-    setMessage(
-      `Successfully transferred $${amount} from your ${fromAccount} account to ${toUsername}.`
-    );
+    try {
+      console.log(`accountType - ${fromAccount}, to - ${toUsername}, amount - ${amount}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/${params.uname}/accounts/transfer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accountType: fromAccount,
+          toUsername,
+          transferAmount: parseFloat(amount),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(
+          `Successfully transferred $${amount} from your ${fromAccount} account to ${toUsername}.`
+        );
+        setFromAccount("");
+        setToUsername("");
+        setAmount("");
+        setDescription("");
+      } else {
+        setError(data.message || "An error occurred during the transfer.");
+      }
+    } catch (err) {
+      console.log(err);
+      setError("Failed to connect to the server. Please try again later.");
+    }
   };
 
   return (
@@ -36,8 +66,8 @@ export default function TransferPage() {
           style={styles.select}
         >
           <option value="">Select From Account</option>
-          <option value="Checking">Checking Account</option>
-          <option value="Savings">Savings Account</option>
+          <option value="checking">Checking Account</option>
+          <option value="savings">Savings Account</option>
         </select>
 
         {/* To Username */}
@@ -71,8 +101,11 @@ export default function TransferPage() {
           Transfer
         </button>
 
-        {/* Success/Error Message */}
-        {message && <p style={styles.message}>{message}</p>}
+        {/* Success Message */}
+        {message && <p style={{ ...styles.message, color: "#28a745" }}>{message}</p>}
+
+        {/* Error Message */}
+        {error && <p style={{ ...styles.message, color: "#dc3545" }}>{error}</p>}
       </form>
     </div>
   );
@@ -128,6 +161,5 @@ const styles = {
   message: {
     marginTop: "20px",
     fontSize: "16px",
-    color: "#28a745",
   },
 };
