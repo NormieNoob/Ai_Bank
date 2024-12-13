@@ -313,34 +313,4 @@ def recent_transactions(username):
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-@accounts_bp.route('/profile', methods=['GET'])
-def get_user_profile(username):
-    try:
-        # Find the user based on the username
-        user = User.query.filter_by(Username=username).first()
-        
-        if not user:
-            return jsonify({
-                "success": False,
-                "message": "User not found"
-            }), 404
-
-        # Return user data matching the frontend's expected structure
-        user_data = {
-            "success": True,
-            "username": user.Username,
-            "firstName": user.FirstName,
-            "lastName": user.LastName,
-            "email": user.Email,
-            "subscriptionType": user.SubscriptionType
-        }
-
-        return jsonify(user_data), 200
-
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        }), 500
-
 
