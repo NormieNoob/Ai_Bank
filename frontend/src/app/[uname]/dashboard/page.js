@@ -129,6 +129,7 @@
 //     marginTop: "10px",
 //   },
 // };
+
 "use client";
 
 import { useState } from "react";
@@ -223,6 +224,18 @@ export default function DashboardPage() {
               />
             </div>
             <p style={styles.cardTitle}>Withdrawal</p>
+          </div>
+        </Link>
+        <Link href={`/${params.uname}/chat`} passHref>
+          <div style={styles.card}>
+            <div style={styles.iconContainer}>
+              <img
+                src="/icons/ai-chat.png"
+                alt="AI Chat"
+                style={styles.icon}
+              />
+            </div>
+            <p style={styles.cardTitle}>AI Assistant</p>
           </div>
         </Link>
       </div>

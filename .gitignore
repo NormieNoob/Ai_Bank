@@ -29,7 +29,17 @@ instance/
 .coverage
 htmlcov/
 backend/flask_session/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
 backend/database.db
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+database/
+db/
 
 # React/Node
 node_modules/
@@ -62,7 +72,6 @@ yarn-error.log*
 ehthumbs.db
 Thumbs.db
 
-
 .next
-frontend/.next/
+frontend/.next
 *.db
