@@ -31,6 +31,10 @@ def create_app():
     app.register_blueprint(accounts_bp, url_prefix='/<username>/accounts/')
     app.register_blueprint(user_bp, url_prefix='/<username>/user/')
 
+    # Initialize the database
+    with app.app_context():
+         db.create_all()
+
     return app
 
 
