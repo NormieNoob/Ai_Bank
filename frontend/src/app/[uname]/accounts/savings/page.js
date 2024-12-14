@@ -24,9 +24,11 @@ const SavingsAccount = () => {
       const data = await response.json();
       if (data.success) {
         setBalance(data.balance);
+        await fetchTransactions();
       } else {
         if (data.status === 'accountNotFound') {
-          setBalance(data.message);
+          setBalance(null);
+          setTransactions([]);
         }
       }
     } catch (err) {
@@ -105,7 +107,6 @@ const SavingsAccount = () => {
 
   useEffect(() => {
     fetchBalance();
-    fetchTransactions();
   }, [params.uname]);
 
   if (loading) {
