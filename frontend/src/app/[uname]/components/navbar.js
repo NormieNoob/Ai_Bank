@@ -90,7 +90,7 @@ const Navbar = () => {
       const data = await response.json();
       console.log('Response:', data); // For debugging
       if (response.ok){
-        router.push("/signin");
+        router.push("/");
       }
     }
     catch (error) {

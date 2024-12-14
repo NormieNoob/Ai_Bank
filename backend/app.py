@@ -2,7 +2,7 @@ from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from models import db
-from routes import auth_bp, accounts_bp
+from routes import auth_bp, accounts_bp, user_bp
 from config import Config
 
 bcrypt = Bcrypt()
@@ -29,10 +29,11 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(accounts_bp, url_prefix='/<username>/accounts/')
+    app.register_blueprint(user_bp, url_prefix='/<username>/user/')
 
     # Initialize the database
     with app.app_context():
-        db.create_all()
+         db.create_all()
 
     return app
 

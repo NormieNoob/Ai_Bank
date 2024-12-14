@@ -11,3 +11,14 @@ class Transaction(db.Model):
     TransactionType = db.Column(db.String(50), nullable=False)
     TransactionDate = db.Column(db.DateTime, default=datetime.utcnow)
     # BranchID = db.Column(db.String(50), db.ForeignKey('branch.BranchID'), nullable=False)
+
+    def to_dict(self):
+        """Convert transaction object to dictionary"""
+        return {
+            'TransactionID': self.TransactionID,
+            'FromAccountID': self.FromAccountID,
+            'ToAccountID': self.ToAccountID,
+            'Amount': self.Amount,
+            'TransactionType': self.TransactionType,
+            'TransactionDate': self.TransactionDate.isoformat()
+        }

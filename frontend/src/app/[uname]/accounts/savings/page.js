@@ -24,9 +24,11 @@ const SavingsAccount = () => {
       const data = await response.json();
       if (data.success) {
         setBalance(data.balance);
+        await fetchTransactions();
       } else {
         if (data.status === 'accountNotFound') {
-          setBalance(data.message);
+          setBalance(null);
+          setTransactions([]);
         }
       }
     } catch (err) {
@@ -48,13 +50,17 @@ const SavingsAccount = () => {
           },
           body: JSON.stringify({
             accountType: 'savings',
+            includeAll: true,
           }),
         }
       );
 
       const data = await response.json();
       if (data.success) {
-        setTransactions(data.transactions);
+        const sortedTransactions = data.transactions
+          .sort((a, b) => new Date(b.TransactionDate) - new Date(a.TransactionDate));
+        
+        setTransactions(sortedTransactions);
       } else {
         setTransactions([]);
         setError(data.message || 'Failed to fetch transactions');
@@ -101,7 +107,6 @@ const SavingsAccount = () => {
 
   useEffect(() => {
     fetchBalance();
-    fetchTransactions();
   }, [params.uname]);
 
   if (loading) {
@@ -124,19 +129,27 @@ const SavingsAccount = () => {
           <table style={styles.table}>
             <thead>
               <tr>
-                <th>Transaction ID</th>
-                <th>Amount</th>
-                <th>Type</th>
-                <th>Date</th>
+                <th style={styles.th}>Transaction ID</th>
+                <th style={styles.th}>Amount</th>
+                <th style={styles.th}>Type</th>
+                <th style={styles.th}>Date</th>
               </tr>
             </thead>
             <tbody>
               {transactions.map((transaction) => (
-                <tr key={transaction.TransactionID}>
-                  <td>{transaction.TransactionID}</td>
-                  <td>${transaction.Amount}</td>
-                  <td>{transaction.TransactionType}</td>
-                  <td>{new Date(transaction.TransactionDate).toLocaleString()}</td>
+                <tr key={transaction.TransactionID} style={styles.tr}>
+                  <td style={styles.td}>{transaction.TransactionID}</td>
+                  <td style={{
+                    ...styles.td,
+                    color: parseFloat(transaction.Amount) >= 0 ? '#28a745' : '#dc3545',
+                    fontWeight: 'bold'
+                  }}>
+                    ${transaction.Amount}
+                  </td>
+                  <td style={styles.td}>{transaction.TransactionType}</td>
+                  <td style={styles.td}>
+                    {new Date(transaction.TransactionDate).toLocaleString()}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -177,6 +190,10 @@ const styles = {
   },
   transactionContainer: {
     marginTop: '30px',
+    padding: '20px',
+    backgroundColor: '#ffffff',
+    borderRadius: '10px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
   },
   subHeading: {
     fontSize: '1.2rem',
@@ -185,17 +202,29 @@ const styles = {
   table: {
     width: '100%',
     borderCollapse: 'collapse',
+    marginTop: '20px',
+    backgroundColor: '#ffffff',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    borderRadius: '8px',
+    overflow: 'hidden',
   },
   th: {
-    border: '1px solid #ddd',
-    padding: '8px',
-    textAlign: 'center',
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#f8f9fa',
+    color: '#495057',
+    padding: '12px',
+    fontWeight: 'bold',
+    textAlign: 'left',
+    borderBottom: '2px solid #dee2e6',
   },
   td: {
-    border: '1px solid #ddd',
-    padding: '8px',
-    textAlign: 'center',
+    padding: '12px',
+    borderBottom: '1px solid #dee2e6',
+    color: '#212529',
+  },
+  tr: {
+    '&:hover': {
+      backgroundColor: '#f8f9fa',
+    },
   },
   button: {
     padding: '10px 20px',

@@ -17,5 +17,6 @@ class Config:
     # Simple session configuration
     SESSION_TYPE = None  # Use Flask's default session handling
     SESSION_COOKIE_SECURE = False
+
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'

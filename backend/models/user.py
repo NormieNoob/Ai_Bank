@@ -14,6 +14,7 @@ class User(db.Model):
     DateOfBirth = db.Column(db.Date, nullable=False)
     Password = db.Column(db.String(200), nullable=False)
     Username = db.Column(db.String(100), nullable=False)
+    SubscriptionType = db.Column(db.String(20), nullable=False, default='free')
 
     def __repr__(self):
         return f'<User {self.Email}>'

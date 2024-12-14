@@ -274,43 +274,29 @@ def createAccount(username):
 @accounts_bp.route('/recent-transactions', methods=['POST'])
 def recent_transactions(username):
     try:
-
         data = request.get_json()
         account_type = data.get('accountType')
+        
         # Find the user based on the username
         user = User.query.filter_by(Username=username).first()
         if not user:
             return jsonify({"success": False, "message": "User not found."}), 404
 
-        # Find the savings account for the user
+        # Find the account for the user
         account = Account.query.filter_by(UserID=user.UserID, AccountType=account_type).first()
         if not account:
             return jsonify({"success": False, "message": f"{account_type} account not found."}), 404
 
-        # Fetch the 5 most recent transactions for the account
-        transactions = (
-            Transaction.query.filter_by(ToAccountID=account.AccountID)
-            .order_by(Transaction.TransactionDate.desc())
-            .limit(5)
-            .all()
-        )
-
-        # Serialize the transactions
-        transaction_data = [
-            {
-                "TransactionID": transaction.TransactionID,
-                "FromAccountID": transaction.FromAccountID,
-                "ToAccountID": transaction.ToAccountID,
-                "Amount": transaction.Amount,
-                "TransactionType": transaction.TransactionType,
-                "TransactionDate": transaction.TransactionDate.isoformat(),
-            }
-            for transaction in transactions
-        ]
+        # Use get_all_transactions() to fetch both incoming and outgoing
+        transactions = account.get_all_transactions()
+        
+        # Take the 10 most recent transactions (they're already sorted by date)
+        transaction_data = transactions[:10]
 
         return jsonify({"success": True, "transactions": transaction_data}), 200
 
     except Exception as e:
+        print(f"Error in recent_transactions: {str(e)}")  # For debugging
         return jsonify({"success": False, "message": str(e)}), 500
 
 

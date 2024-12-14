@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  poweredByHeader: false,
   reactStrictMode: true,
-};
+  // Add any other necessary config
+}
 
-export default nextConfig;
+module.exports = nextConfig 
