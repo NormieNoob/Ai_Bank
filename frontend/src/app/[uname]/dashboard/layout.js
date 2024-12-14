@@ -1,11 +1,13 @@
-import Navbar from "../components/navbar"
+"use client";
+
+import { useParams } from 'next/navigation';
+import Navbar from "../components/navbar";
+
 export default function RootLayout({ children }) {
   return (
-      <body>
-        <header>
-        </header>
-        <Navbar />
-        {children}
-      </body>
+    <>
+      <Navbar />
+      {children}
+    </>
   );
 }

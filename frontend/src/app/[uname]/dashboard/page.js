@@ -83,7 +83,10 @@ export default function DashboardPage() {
   return (
     <div style={styles.container}>
       <h1 style={styles.welcomeMessage}>
-        Welcome {userInfo ? `${userInfo.firstName} ${userInfo.lastName}!` : ''}
+        <span style={styles.welcomeText}>Welcome </span>
+        <span style={styles.userName}>
+          {userInfo ? `${userInfo.firstName} ${userInfo.lastName}!` : ''}
+        </span>
       </h1>
       
       {/* Subscription Status and Upgrade Button */}
@@ -105,7 +108,7 @@ export default function DashboardPage() {
           <div style={styles.card}>
             <div style={styles.iconContainer}>
               <img
-                src="../icons/savings-acc-icon.png"
+                src="/icons/savings-acc-icon.png"
                 alt="Savings Account"
                 style={styles.icon}
               />
@@ -119,7 +122,7 @@ export default function DashboardPage() {
           <div style={styles.card}>
             <div style={styles.iconContainer}>
               <img
-                src="../icons/checking-acc-icon.png"
+                src="/icons/checking-acc-icon.png"
                 alt="Checking Account"
                 style={styles.icon}
               />
@@ -133,7 +136,7 @@ export default function DashboardPage() {
           <div style={styles.card}>
             <div style={styles.iconContainer}>
               <img
-                src="../icons/credit-card-icon.png"
+                src="/icons/credit-card-icon.png"
                 alt="Credit Card"
                 style={styles.icon}
               />
@@ -147,7 +150,7 @@ export default function DashboardPage() {
           <div style={styles.card}>
             <div style={styles.iconContainer}>
               <img
-                src="../icons/transfer.png"
+                src="/icons/transfer.png"
                 alt="transfer"
                 style={styles.icon}
               />
@@ -161,7 +164,7 @@ export default function DashboardPage() {
           <div style={styles.card}>
             <div style={styles.iconContainer}>
               <img
-                src="../icons/deposit.png"
+                src="/icons/deposit.png"
                 alt="Deposit"
                 style={styles.icon}
               />
@@ -174,7 +177,7 @@ export default function DashboardPage() {
           <div style={styles.card}>
             <div style={styles.iconContainer}>
               <img
-                src="../icons/withdrawal.png"
+                src="/icons/withdrawal.png"
                 alt="Deposit"
                 style={styles.icon}
               />
@@ -224,8 +227,17 @@ const styles = {
   },
   welcomeMessage: {
     fontSize: "2rem",
-    color: "#007bff",
     marginBottom: "40px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "8px",
+  },
+  welcomeText: {
+    color: "#007bff",
+  },
+  userName: {
+    color: "#000000",
   },
   cardContainer: {
     display: "grid",

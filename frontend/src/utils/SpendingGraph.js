@@ -113,11 +113,8 @@ const SpendingGraph = ({ transactions }) => {
 const styles = {
   graphContainer: {
     width: '100%',
-    padding: '20px',
-    backgroundColor: '#ffffff',
-    borderRadius: '10px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    marginTop: '20px'
+    height: '100%',
+    position: 'relative'
   }
 };
 
