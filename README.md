@@ -1,5 +1,5 @@
 # AI powered Online Banking System
-### Tech stack - React.Js + Flask
+### Tech stack - Next.Js + Flask
 
 ## Setup steps
 
