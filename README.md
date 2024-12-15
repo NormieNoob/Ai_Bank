@@ -1,5 +1,5 @@
 # AI powered Online Banking System
-### Tech stack - Next.Js + Flask
+### Tech stack - React.Js + Flask
 
 ## Setup steps
 
@@ -44,37 +44,37 @@ npn run dev
 
 ## Screenshots
 
-* Home page -
+
 ![img.png](screenshots/img.png)
 
 
-* Signup - 
+
 ![img_1.png](screenshots/img_1.png)
 
 
-* Login -
+
 ![img_2.png](screenshots/img_2.png)
 
 
-* Dashboard -
+
 ![img_3.png](screenshots/img_3.png)
 
 
-* Balance & transaction history -
+
 ![img_4.png](screenshots/img_4.png)
 
 
-* Fund transfer -
+
 ![img_5.png](screenshots/img_5.png)
 
 
-* eposit -
+
 ![img_6.png](screenshots/img_6.png)
 
 
-* Withdraw -
+
 ![img_7.png](screenshots/img_7.png)
 
 
-* Ai Assistant -
+
 ![img_8.png](screenshots/img_8.png)
